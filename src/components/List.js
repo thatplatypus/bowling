@@ -1,10 +1,9 @@
 import React, { Children, Component } from 'react';
 import '../App.css';
-import Frame from '../game/Frame';
-
 
 class List extends Component {
 
+    //Generic wrapper for a React list
     render() {
         return (<>
             <ul className="listContainer">

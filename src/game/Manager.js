@@ -2,18 +2,19 @@ import React, { Component, Suspense } from 'react';
 import FrameList from '../game/FrameList'
 import '../App.css';
 
+//Main logic for the stateful bowling game component
 class Manager extends Component {
 
     constructor() {
         super();
         this.state = {
-            started: false,
-            roll: 0,
-            turn: 1,
-            frame: 1,
-            frames: [],
-            totalScore: 0,
-            gameOver: false
+            started: false, //When the game starts
+            roll: 0, //Current roll
+            turn: 1, //Current turn, 1 is first roll in a frame, 2 is second, 3 is last frame extra roll
+            frame: 1, //Current frame, 1-10
+            frames: [], //Array to hold the data for each frame we are passing as props
+            totalScore: 0, //Overall score of the game
+            gameOver: false //To end the game
 
         };
         this.handleStart = this.handleStart.bind(this);
@@ -24,17 +25,18 @@ class Manager extends Component {
     maxFrames = 10;
 
     newFrame() {
+        //represents a single frame in the frames state array
         return {
-            roll1: 0,
-            roll2: 0,
-            roll3: 0,
-            frame: 0,
-            id: 0,
-            score: 0,
-            runningScore: "",
-            spare: false,
-            strike: false,
-            closed: false,
+            roll1: 0, //First roll in a given frame
+            roll2: 0, //Second roll in a given frame
+            roll3: 0, //Special handling for a 3rd ball int he last frame
+            frame: 0, //Current frame [0 index + 1]
+            id: 0, //Matches frame for the list key
+            score: 0, //Represents the score from the frame
+            runningScore: "", //Represents the total score up to that frame for display
+            spare: false, //Has a spare occurred in the frame
+            strike: false, //Has a strike occurred in the frame
+            closed: false, //Is the frame closed to display the current running score
         };
     }
 
@@ -46,6 +48,7 @@ class Manager extends Component {
     }
 
     start() {
+        //Initialize the default array of frames for the game
         let newFrames = this.state.frames;
         for (let i = 1; i <= this.maxFrames; i++) {
             let newFrame = this.newFrame();
@@ -63,6 +66,10 @@ class Manager extends Component {
     }
 
     calculateScore(newFrames, frameIndex, spare, strike) {
+        //This is going to be called for every frame to calculate the bonuses from strikes and spares
+        //Those rely on information from other frames so the manager needs to track the state of all frames
+        //Ideally this would be refactored into smaller functions in part, like handling strikes/spares/last frame edges seperately
+
         let currentScore = 0;
         let nextRoll = 0;
         let lastFrame = frameIndex + 1 === this.maxFrames;
@@ -113,7 +120,8 @@ class Manager extends Component {
     setupNextTurn(newFrames, advanceFrame, nextTurn) {
         let nextFrame = this.state.frame;
 
-        //On the last frame but should advance
+        //On the last frame but "should advance"
+        //Here it means we got a strike so close the frame to display the score and track additional scores to update with
         if (this.state.frame === this.maxFrames && advanceFrame) {
             if (nextTurn < 2 && newFrames[nextFrame - 1].strike) {
                 newFrames[nextFrame - 1].closed = true;
@@ -132,6 +140,9 @@ class Manager extends Component {
     }
 
     updateScore() {
+        //Everytime we get a new roll we can potentially back calculate previous frames with the new information
+        //This lets us keep the score by frame updated in as real time as possible
+
         let newTotalScore = 0;
         let newFrames = this.state.frames;
         newFrames.forEach((frame) => {
@@ -153,6 +164,7 @@ class Manager extends Component {
     }
 
     handleChange(e) {
+        //Keeps the current roll live in state and forced to be an integer or discounted roll of 0 (Gutter ball?)
         const { id, value } = e.target;
         let newValue = 0;
         try {
@@ -207,6 +219,14 @@ class Manager extends Component {
     }
 
     render() {
+        /*
+         * We have 3 high level states to return from the manager:
+         * 1. Game not started, show a splash screen and button to start it
+         * 2. Bowling game in progress
+            * 2.x Bowling game is advancing frames
+         * 3. Game has ended
+
+        */
         return (<div className="game-container">
             {!this.state.started && <>Bowling Game - Unstarted
                 <div>

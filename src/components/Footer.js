@@ -8,7 +8,6 @@ class Footer extends Component {
         super();
     };
 
-
     render() {
         return (
             <header className="App-footer" >

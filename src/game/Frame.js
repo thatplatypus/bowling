@@ -3,9 +3,8 @@ import '../App.css';
 
 class Frame extends Component {
 
-
+    //Reusable component to represent a frame
     render() {
-
         return (<>
             <div className="frameContainer">
                 <div className="frameContainerTopBar">

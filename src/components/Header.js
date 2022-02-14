@@ -8,7 +8,6 @@ class Header extends Component {
         super();
     };
 
-
     render() {
         return (
             <header className="App-header" >
