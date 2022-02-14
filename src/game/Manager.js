@@ -203,6 +203,7 @@ class Manager extends Component {
             let strike = this.state.roll >= 10;
             newFrames[this.state.frame - 1].strike = strike;
             newFrames[this.state.frame - 1].roll1 = this.state.roll;
+            newFrames[this.state.frame - 1].closed = true;
             if (this.state.frame === this.maxFrames) {
                 this.setupNextTurn(this.newFrame, false, 2);
             } else {
