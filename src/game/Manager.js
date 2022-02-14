@@ -65,25 +65,46 @@ class Manager extends Component {
     calculateScore(newFrames, frameIndex, spare, strike) {
         let currentScore = 0;
         let nextRoll = 0;
+        let lastFrame = frameIndex + 1 === this.maxFrames;
 
         currentScore += newFrames[frameIndex].roll1;
         currentScore += newFrames[frameIndex].roll2;
 
         if (strike) {
             try {
-                nextRoll = newFrames[frameIndex + 1].roll1;
-                currentScore += nextRoll;
-            } catch { currentScore += 0; }
+                if (lastFrame) {
+                    nextRoll = newFrames[frameIndex].roll2;
+                    console.log(nextRoll);
+                } else {
+                    nextRoll = newFrames[frameIndex + 1].roll1;
+                    currentScore += nextRoll;
+                }
+            } catch {
+                console.log(frameIndex + " threw an error on strike");
+                currentScore += 0;
+            }
             try {
-                if (nextRoll < 10) {
+                if (!lastFrame && nextRoll < 10) {
                     currentScore += newFrames[frameIndex + 1].roll2;
                 } else {
-                    currentScore += newFrames[frameIndex + 2].roll1;
+                    if (lastFrame) {
+                        currentScore += newFrames[frameIndex].roll3;
+                    } else if (frameIndex === this.maxFrames - 2) {
+                        currentScore += newFrames[frameIndex + 1].roll2;
+                    } else {
+                        currentScore += newFrames[frameIndex + 2].roll1;
+                    }
                 }
-            } catch { currentScore += 0; }
+            } catch {
+                currentScore += 0;
+            }
         } else if (spare) {
             try {
-                nextRoll = newFrames[frameIndex + 1].roll1;
+                if (lastFrame) {
+                    nextRoll = newFrames[frameIndex].roll3;
+                } else {
+                    nextRoll = newFrames[frameIndex + 1].roll1;
+                }
                 currentScore += nextRoll;
             } catch { currentScore += 0; }
         }
@@ -94,7 +115,13 @@ class Manager extends Component {
     setupNextTurn(newFrames, advanceFrame, nextTurn) {
         let nextFrame = this.state.frame;
 
-        if (advanceFrame) {
+        //On the last frame but should advance
+        if (this.state.frame === this.maxFrames && advanceFrame) {
+            if (nextTurn < 2 && newFrames[nextFrame - 1].strike) {
+                newFrames[nextFrame - 1].closed = true;
+                nextTurn += 1;
+            }
+        } else if (advanceFrame) {
             newFrames[nextFrame - 1].closed = true;
             nextFrame = Math.min(this.state.frame + 1, this.maxFrames);
         }
@@ -149,20 +176,33 @@ class Manager extends Component {
 
     handleRoll(e) {
         let newFrames = this.state.frames;
+        let endGame = false;
 
         if (this.state.turn === 1) {
             let strike = this.state.roll >= 10;
             newFrames[this.state.frame - 1].strike = strike;
             newFrames[this.state.frame - 1].roll1 = this.state.roll;
-            this.setupNextTurn(newFrames, strike, strike ? 1 : 2);
+            if (this.state.frame === this.maxFrames) {
+                this.setupNextTurn(this.newFrame, false, 2);
+            } else {
+                this.setupNextTurn(newFrames, strike, strike ? 1 : 2);
+            }
 
         } else if (this.state.turn === 2) {
             newFrames[this.state.frame - 1].spare = newFrames[this.state.frame - 1].roll1 + this.state.roll >= 10;
-            newFrames[this.state.frame - 1].roll2 = Math.min(this.state.roll, 10 - newFrames[this.state.frame - 1].roll1);
-            this.setupNextTurn(newFrames, true, 1);
+            newFrames[this.state.frame - 1].roll2 = Math.min(this.state.roll, 10 - (this.state.frame !== this.maxFrames ? newFrames[this.state.frame - 1].roll1 : 0));
+            this.setupNextTurn(newFrames, true, this.state.frame === this.maxFrames ? 3 : 1);
+
+        } else if (this.state.turn === 3) {
+            console.log(newFrames[this.state.frame - 1].roll2);
+            newFrames[this.state.frame - 1].roll3 = Math.min(this.state.roll, 10);
+            newFrames[this.state.frame - 1].closed = true;
+            console.log(newFrames[this.state.frame - 1].roll3);
+            endGame = true;
         }
 
         this.updateScore();
+        this.setState({ gameOver: endGame });
     }
 
     render() {
@@ -172,25 +212,28 @@ class Manager extends Component {
              <button id="start"
               onClick={e => this.handleStart(e)}>
                 Start
-                </button></div></>
+             </button></div></>
             }
             {this.state.started && <>Bowling Game - Frame {this.state.frame} / {this.maxFrames}
+                {this.state.frame === this.maxFrames && this.state.turn === 3 && <> - Extra Shot</>}
             <div>
                 <FrameList
                     data={this.state.frames}
-                />
-                <input
-                    type="number"
-                    id="roll"
-                    value={this.state.value}
-                    min="0"
-                    max="10"
-                    onChange={e => this.handleChange(e)}
-                />
-            <button id="roll"
-                onClick={e => this.handleRoll(e)}>
-                Roll
-                </button>
+                   />
+                    {!this.state.gameOver && <>
+                        <input
+                            type="number"
+                            id="roll"
+                            value={this.state.value}
+                            min="0"
+                            max="10"
+                            onChange={e => this.handleChange(e)}
+                        />
+                        <button id="roll"
+                            onClick={e => this.handleRoll(e)}>
+                            Roll
+                        </button> </>}
+                    {this.state.gameOver && <div>Game over! Final Score: {this.state.totalScore}</div>}
             </div>
             </>}
          </div>);

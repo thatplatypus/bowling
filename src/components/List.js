@@ -9,7 +9,7 @@ class List extends Component {
         return (<>
             <ul className="listContainer">
                 {this.props.data.map(item =>
-                (<li key={item.id}>
+                (<li className="listCell" key={item.id}>
                     {React.cloneElement(this.props.children, item)}
                 </li>))}
                 </ul>
