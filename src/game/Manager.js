@@ -72,7 +72,7 @@ class Manager extends Component {
     calculateScore(newFrames, frameIndex, spare, strike) {
         //This is going to be called for every frame to calculate the bonuses from strikes and spares
         //Those rely on information from other frames so the manager needs to track the state of all frames
-        //Ideally this would be refactored into smaller functions in part, like handling strikes/spares/last frame edges seperately
+        //Possibly refactor into smaller functions, like handling strikes/spares/last frame edges seperately
 
         let currentScore = 0;
         let nextRoll = 0;
@@ -81,6 +81,7 @@ class Manager extends Component {
         currentScore += newFrames[frameIndex].roll1;
         currentScore += newFrames[frameIndex].roll2;
 
+        //if we have a strike, the next frame to count is roll1 of the next frame, unless it is the last frame, then check roll2
         if (strike) {
             try {
                 if (lastFrame) {
@@ -93,6 +94,9 @@ class Manager extends Component {
                 currentScore += 0;
             }
             try {
+                //If we didn't get a second strike, you'll get the next value from the next frame's roll2
+                //If we did, check Roll1 two frames ahead
+                //If we are the last frame, then we use roll3 for the edge case of strike -> strike -> anything in the last frame
                 if (!lastFrame && nextRoll < 10) {
                     currentScore += newFrames[frameIndex + 1].roll2;
                 } else {
@@ -108,6 +112,7 @@ class Manager extends Component {
                 currentScore += 0;
             }
         } else if (spare) {
+            //Same as above, but one less check because the spare happens in the 2nd frame.
             try {
                 if (lastFrame) {
                     nextRoll = newFrames[frameIndex].roll3;
@@ -194,6 +199,7 @@ class Manager extends Component {
         let endGame = false;
 
         if (this.state.turn === 1) {
+            //First roll, check for strikes and setup the next roll
             let strike = this.state.roll >= 10;
             newFrames[this.state.frame - 1].strike = strike;
             newFrames[this.state.frame - 1].roll1 = this.state.roll;
@@ -204,6 +210,7 @@ class Manager extends Component {
             }
 
         } else if (this.state.turn === 2) {
+            //Second roll, check for spares, and set up the next frame
             newFrames[this.state.frame - 1].spare = newFrames[this.state.frame - 1].roll1 + this.state.roll >= 10;
             newFrames[this.state.frame - 1].roll2 = Math.min(this.state.roll, 10 - (this.state.frame !== this.maxFrames ? newFrames[this.state.frame - 1].roll1 : 0));
             if (lastFrame && !newFrames[this.state.frame - 1].spare) {
@@ -213,6 +220,7 @@ class Manager extends Component {
             }
          
         } else if (this.state.turn === 3) {
+            //Special case for extra roll on the last frame
             newFrames[this.state.frame - 1].roll3 = Math.min(this.state.roll, 10);
             newFrames[this.state.frame - 1].closed = true;
             endGame = true;

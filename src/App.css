@@ -105,6 +105,7 @@ body, html {
 
 .game-instructions {
     margin-bottom: 10px;
+    font-size: 20px;
 }
 
 .game-new {
@@ -125,8 +126,16 @@ body, html {
     width: 90%;
     float: left;
     border: solid 1px;
+    background-color: white;
     min-height: 50px;
-    
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    padding: 2px;
+}
+
+.frameContainer:hover {
+    border-bottom-color: #813524;
 }
 
 .listCell:nth-child(-n+5) {
@@ -147,6 +156,14 @@ body, html {
     margin: 1px;
 }
 
+.frameContainerCell {
+    background-color: white;
+}
+
+.listCell:hover {
+    color: #813524;
+}
+
 .frameContainerBottomBar {
     margin-top: 5px;
     font-size: 20px;
@@ -158,15 +175,28 @@ input {
     border-left: none;
     margin-right: 10px;
     min-width: 25%;
-    font-size: 18px;
+    font-size: 24px;
+}
+
+input:hover {
+    border-bottom-color: #813524;
 }
  
 button {
     min-width: 15%;
-    font-size: 18px;
+    font-size: 24px;
     margin-right: 10px;
+    border-radius: 4px;
+    border-width: 0.5px;
+    transition: 0.5s;
+    background-color: white;
 }
 
 button:disabled {
     cursor: not-allowed;
+}
+
+button:hover {
+    background-color: #813524;
+    color: white;
 }
