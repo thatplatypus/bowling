@@ -20,6 +20,7 @@ class Manager extends Component {
         this.handleStart = this.handleStart.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleRoll = this.handleRoll.bind(this);
+        this.handleReset = this.handleReset.bind(this);
     }
 
     maxFrames = 10;
@@ -49,7 +50,7 @@ class Manager extends Component {
 
     start() {
         //Initialize the default array of frames for the game
-        let newFrames = this.state.frames;
+        let newFrames = [];
         for (let i = 1; i <= this.maxFrames; i++) {
             let newFrame = this.newFrame();
             newFrame.id = i;
@@ -58,10 +59,13 @@ class Manager extends Component {
         }
         
         this.setState({
-            turn: 1,
-            frame: 1,
-            frames: newFrames,
-            started: true
+            started: true, 
+            roll: 0, 
+            turn: 1, 
+            frame: 1, 
+            frames: newFrames, 
+            totalScore: 0,
+            gameOver: false
         });
     }
 
@@ -218,6 +222,11 @@ class Manager extends Component {
         this.setState({ gameOver: endGame });
     }
 
+    handleReset(e) {
+        this.start();
+        //this.updateScore();
+    }
+
     render() {
         /*
          * We have 3 high level states to return from the manager:
@@ -228,36 +237,45 @@ class Manager extends Component {
 
         */
         return (<div className="game-container">
-            {!this.state.started && <>Bowling Game - Unstarted
+            
+            {!this.state.started && <div className="game-new">Bowling Game - Unstarted
                 <div>
-             <button id="start"
-              onClick={e => this.handleStart(e)}>
-                Start
-             </button></div></>
+                    <button id="start"
+                        onClick={e => this.handleStart(e)}>
+                        Start
+                    </button></div>
+                </div>
             }
-            {this.state.started && <>Bowling Game - Frame {this.state.frame} / {this.maxFrames}
-                {this.state.frame === this.maxFrames && this.state.turn === 3 && <> - Extra Shot</>}
-            <div>
-                <FrameList
-                    data={this.state.frames}
-                   />
-                    {!this.state.gameOver && <>
+
+            {this.state.started && <>
+                <div className="game-header">Bowling Game - Frame {this.state.frame} / {this.maxFrames} {this.state.frame === this.maxFrames && this.state.turn === 3 && <> - Extra Shot</>}</div>
+                <div className="game-content">
+                    <FrameList
+                        data={this.state.frames} /> </div>
+                <div className="game-instructions">Please enter the number of pins to knockover:</div>
+                <div className="game-ui">
                         <input
                             type="number"
                             id="roll"
-                            value={this.state.value}
+                            value={this.state.roll}
                             min="0"
                             max="10"
-                            onChange={e => this.handleChange(e)}
-                        />
-                        <button id="roll"
-                            onClick={e => this.handleRoll(e)}>
-                            Roll
-                        </button> </>}
-                    {this.state.gameOver && <div>Game over! Final Score: {this.state.totalScore}</div>}
-            </div>
-            </>}
-         </div>);
+                            onChange={e => this.handleChange(e)} />
+                    <button id="roll"
+                        onClick={e => this.handleRoll(e)}
+                        disabled={this.state.gameOver}>                                           
+                        Roll
+                    </button>
+
+                    <button id="reset"
+                        onClick={e => this.handleReset(e)}>
+                        Reset Game
+                    </button>
+                    </div></>
+            }
+            {this.state.gameOver && <div>Game over! Final Score: {this.state.totalScore}</div>}
+        </div>);
+
     }
 }
 
