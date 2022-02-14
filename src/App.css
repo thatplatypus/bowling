@@ -181,6 +181,11 @@ input {
 input:hover {
     border-bottom-color: #813524;
 }
+
+input:focus {
+    outline-color: #813524;
+    border: none;
+}
  
 button {
     min-width: 15%;
@@ -193,7 +198,12 @@ button {
 }
 
 button:disabled {
+    color: black;
     cursor: not-allowed;
+}
+
+button:disabled:hover {
+    background-color: darkgrey;
 }
 
 button:hover {

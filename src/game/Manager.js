@@ -256,7 +256,7 @@ class Manager extends Component {
             }
 
             {this.state.started && <>
-                <div className="game-header">Bowling Game - Frame {this.state.frame} / {this.maxFrames} {this.state.frame === this.maxFrames && this.state.turn === 3 && <> - Extra Shot</>}</div>
+                <div className="game-header">Bowling Game - Frame {this.state.frame} / {this.maxFrames} - Current Score {this.state.totalScore} {this.state.frame === this.maxFrames && this.state.turn === 3 && <> - Extra Shot</>}</div>
                 <div className="game-content">
                     <FrameList
                         data={this.state.frames} /> </div>
