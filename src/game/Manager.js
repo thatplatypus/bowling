@@ -74,13 +74,11 @@ class Manager extends Component {
             try {
                 if (lastFrame) {
                     nextRoll = newFrames[frameIndex].roll2;
-                    console.log(nextRoll);
                 } else {
                     nextRoll = newFrames[frameIndex + 1].roll1;
                     currentScore += nextRoll;
                 }
             } catch {
-                console.log(frameIndex + " threw an error on strike");
                 currentScore += 0;
             }
             try {
@@ -176,6 +174,7 @@ class Manager extends Component {
 
     handleRoll(e) {
         let newFrames = this.state.frames;
+        let lastFrame = this.state.frame === this.maxFrames;
         let endGame = false;
 
         if (this.state.turn === 1) {
@@ -191,13 +190,15 @@ class Manager extends Component {
         } else if (this.state.turn === 2) {
             newFrames[this.state.frame - 1].spare = newFrames[this.state.frame - 1].roll1 + this.state.roll >= 10;
             newFrames[this.state.frame - 1].roll2 = Math.min(this.state.roll, 10 - (this.state.frame !== this.maxFrames ? newFrames[this.state.frame - 1].roll1 : 0));
-            this.setupNextTurn(newFrames, true, this.state.frame === this.maxFrames ? 3 : 1);
-
+            if (lastFrame && !newFrames[this.state.frame - 1].spare) {
+                endGame = true;
+            } else {
+                this.setupNextTurn(newFrames, true, this.state.frame === this.maxFrames ? 3 : 1);
+            }
+         
         } else if (this.state.turn === 3) {
-            console.log(newFrames[this.state.frame - 1].roll2);
             newFrames[this.state.frame - 1].roll3 = Math.min(this.state.roll, 10);
             newFrames[this.state.frame - 1].closed = true;
-            console.log(newFrames[this.state.frame - 1].roll3);
             endGame = true;
         }
 
