@@ -210,3 +210,7 @@ button:hover {
     background-color: #813524;
     color: white;
 }
+
+#start {
+    margin-top: 30px;
+}
